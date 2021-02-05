@@ -27,13 +27,13 @@
           v-if="isInUserRoom"
           type="is-success"
           >
-           Yes
+            Yes
           </b-tag>
           <b-tag
           v-else
           type="is-warning"
           >
-           No
+            No
           </b-tag>
         </div>
       </div>
@@ -49,13 +49,13 @@
           rounded
           @click="addSomeoneToUserRoom"
           >
-           Add Someone to User Room
+            Add Someone to User Room
           </b-button>
         </div>
       </div>
     </b-field>
     
-    <br />
+    <br>
 
     <!-- staffRoomId -->
     <b-field label="Staff Room" label-position="on-border">
@@ -79,13 +79,13 @@
           v-if="isInStaffRoom"
           type="is-success"
           >
-           Yes
+            Yes
           </b-tag>
           <b-tag
           v-else
           type="is-warning"
           >
-           No
+            No
           </b-tag>
         </div>
       </div>
@@ -101,7 +101,7 @@
           rounded
           @click="addSomeoneToStaffRoom"
           >
-           Add Someone to Staff Room
+            Add Someone to Staff Room
           </b-button>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default {
     ...mapGetters([
       'roomTitles',
       'memberships',
-      'jwtUser'
+      'me'
     ]),
     isInUserRoom () {
       return this.memberships[this.user._id].find(membership => {
@@ -226,7 +226,7 @@ export default {
         type: 'is-success',
         rounded: true,
         inputAttrs: {
-          value: this.jwtUser.email
+          value: this.me.email
         },
         onConfirm: personEmail => {
           this.createMembership({

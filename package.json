@@ -1,7 +1,7 @@
 {
-  "name": "helper-bot-ui",
-  "version": "2020.12.10",
-  "description": "UI for the dCloud Helper Bot admin web portal",
+  "name": "isg-ui",
+  "version": "2021.2.4",
+  "description": "UI for the dCloud ISG Webex demo",
   "author": "Coty Condry <ccondry@cisco.com>",
   "main": "dist/js/index.common.js",
   "unpkg": "dist/js/index.js",
@@ -18,16 +18,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ccondry/helper-bot-ui"
+    "url": "https://github.com/ccondry/isg-ui"
   },
   "bugs": {
-    "url": "https://github.com/ccondry/helper-bot-ui/issues"
+    "url": "https://github.com/ccondry/isg-ui/issues"
   },
   "keywords": [
     "Cisco",
     "dCloud",
-    "helper",
-    "bot"
+    "Webex"
   ],
   "license": "MIT",
   "dependencies": {
@@ -86,10 +85,8 @@
     "file-loader": "^1.1.11",
     "file-save": "^0.2.0",
     "html-webpack-plugin": "^3.2.0",
-    "i": "^0.3.6",
     "json-loader": "^0.5.7",
     "json-templater": "^1.0.4",
-    "lodash": "^4.17.15",
     "mini-css-extract-plugin": "^0.4.1",
     "node-sass": "^4.11.0",
     "npm": "^6.10.0",

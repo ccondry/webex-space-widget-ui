@@ -3,6 +3,7 @@ import Vue from 'vue'
 import {ToastProgrammatic as Toast} from 'buefy/src'
 import {addUrlQueryParams} from '../../utils'
 import {version} from '../../../package.json'
+import router from '../../router'
 
 const state = {
   loading: {
@@ -104,7 +105,7 @@ const actions = {
       // set accept to JSON by default
       options.headers['Accept'] = options.headers['Accept'] || 'application/json'
       // set JWT auth header by default
-      options.headers['Authorization'] = options.headers['Authorization'] || 'Bearer ' + getters.jwt
+      // options.headers['Authorization'] = options.headers['Authorization'] || 'Bearer ' + getters.jwt
       // set instant demo instance name
       // options.headers['Instance'] = getters.instanceName
       // stringify body if it is an object
@@ -140,9 +141,9 @@ const actions = {
           return text
         }
       } else if (response.status === 401) {
-        // expired JWT. forget jwt and forward to SSO login
+        // expired JWT. forget jwt and forward to home page
         window.localStorage.removeItem('jwt')
-        return dispatch('login')
+        router.push({name: 'Home'})
       } else {
         // not OK and not 401
         let m = text

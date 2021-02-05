@@ -12,5 +12,20 @@ const routes = [{
   name: 'Admin',
   path: '/admin',
   component: () => import(`../views/admin.vue`)
+}, {
+  // complete oauth login
+  name: 'Login',
+  path: '/oauth',
+  component: () => import(`../views/oauth.vue`)
+}, {
+  // agent
+  name: 'Agent',
+  path: '/agent',
+  component: () => import(`../views/agent.vue`)
+}, {
+  // customer
+  name: 'Customer',
+  path: '/customer',
+  component: () => import(`../views/customer.vue`)
 }]
 export default routes

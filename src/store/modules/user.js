@@ -6,170 +6,159 @@ import {ToastProgrammatic as Toast} from 'buefy/src'
 import * as types from '../mutation-types'
 import router from '../../router'
 
-// parse a JWT payload into a JSON object
-function parseJwt (token) {
-  const base64Url = token.split('.')[1]
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-  return JSON.parse(window.atob(base64))
-}
-
 const state = {
-  jwt: null
+  token: null,
+  me: null,
+  spaceId: null
 }
 
 const mutations = {
-  [types.SET_JWT] (state, data) {
-    state.jwt = data
+  [types.SET_TOKEN] (state, data) {
+    state.token = data
+  },
+  [types.SET_ME] (state, data) {
+    state.me = data
+  },
+  [types.SET_SPACE_ID] (state, data) {
+    state.spaceId = data
   }
 }
 
 const getters = {
-  isAdmin: (state, getters) => {
-    try {
-      // const adminGroupDn = 'CN=test,CN=Users,DC=uk,DC=cms-dcloud,DC=com'
-      // return getters.adUser.memberOf.includes(adminGroupDn)
-      return getters.jwtUser.isAdmin
-    } catch (e) {
-      return false
-    }
-  },
-  adUser: (state, getters) => {
-    try {
-      return getters.users.find(v => v.sAMAccountName === getters.jwtUser.sub)
-    } catch (e) {
-      return null
-    }
-  },
-  jwt: state => state.jwt,
+  spaceId: state => state.spaceId,
+  token: state => state.token,
   isLoggedIn: (state, getters) => {
     try {
-      return getters.jwtUser.email.length > 0
+      return getters.me.emails.length > 0
     } catch (e) {
       return false
     }
   },
-  jwtUser: state => {
-    try {
-      return parseJwt(state.jwt)
-    } catch (e) {
-      return null
-    }
-  },
-  ssoRedirectUri: () => {
+  me: state => state.me,
+  oauthRedirectUri: () => {
     // the URL the browser should return to once SSO is done
-    return `${window.location.protocol}//${window.location.host}/`
+    return `${window.location.protocol}//${window.location.host}/oauth`
   },
-  ssoUrl: (state, getters) => {
-    // the URL to send the user to for SSO login
-    const endpoint = 'https://cloudsso.cisco.com/as/authorization.oauth2'
+  oauthClientId: () => {
+    // TODO get from REST API
+    return 'C7a20b4c7208212f740fe24e40afa18229cb247e0881c3c455bc28605e27924c6'
+  },
+  oauthUrl: (state, getters) => {
+    const endpoint = 'https://webexapis.com/v1/authorize'
+    // TODO get these from REST API? maybe?
     const scopes = [
-      'profile',
-      'email',
-      'openid'
+      'spark:kms',
+      'spark:all'
     ]
     const params = {
-      client_id: 'helper-bot-login',
+      // TODO get client_id from REST API since it is defined there
+      client_id: getters.oauthClientId,
       response_type: 'code',
-      redirect_uri: getters.ssoRedirectUri,
+      redirect_uri: getters.oauthRedirectUri,
       scope: scopes.join(' '),
-      state: 'helper-bot-login'
+      // arbitrary value for our use
+      state: 'webex-login'
     }
     return addUrlQueryParams(endpoint, params)
   }
 }
 
 const actions = {
-  setJwt ({commit, dispatch}, jwt) {
-    try {
-      // test parse JWT to user JSON
-      parseJwt(jwt)
-      // put JWT in state
-      commit(types.SET_JWT, jwt)
-      // put JWT in localStorage
-      window.localStorage.setItem('jwt', jwt)
-      // get main site data for user
-      dispatch('getRooms')
-    } catch (e) {
-      // parseJwt failed - delete this invalid JWT
-      dispatch('unsetJwt')
+  async joinSpace ({commit}, data) {
+    Toast.open({
+      message: 'join space ' + data,
+      type: 'is-info',
+      duration: 16 * 1000
+    })
+    commit(types.SET_SPACE_ID, data)
+  },
+  async getMe ({dispatch, getters}) {
+    const response = await dispatch('fetch', {
+      url: 'https://webexapis.com/v1/people/me',
+      group: 'webex',
+      type: 'me',
+      message: 'get webex user details',
+      options: {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + getters.token
+        }
+      },
+      mutation: types.SET_ME
+    })
+    if (response instanceof Error) {
+      // error
+    } else {
+      // success
     }
   },
-  unsetJwt ({commit}) {
+  setToken ({commit, dispatch}, token) {
+    // put token JSON in state
+    commit(types.SET_TOKEN, token)
+    // put JWT in localStorage
+    window.localStorage.setItem('token', token)
+    // get user info from webex API
+    dispatch('getMe')
+  },
+  unsetToken ({commit}) {
     // remove JWT from state
-    commit(types.SET_JWT, null)
+    commit(types.SET_TOKEN, null)
     // remove JWT from localStorage
-    window.localStorage.removeItem('jwt')
+    window.localStorage.removeItem('token')
   },
   logout ({dispatch}) {
-    dispatch('unsetJwt')
+    dispatch('unsetToken')
   },
-  async checkJwt ({dispatch, getters}) {
+  checkToken ({dispatch, getters}) {
+    // check if there is a token in localstorage, and restore it to state
+    const token = window.localStorage.getItem('token')
+    if (token) {
+      console.log('token found in localstorage:', token)
+      // token is in localstorage. put token in state.
+      dispatch('setToken', token)
+    }
+  },
+  async completeOauth2 ({dispatch, getters}) {
     // get current URL query params
     const query = getUrlQueryParams()
-    // check jwt in browser local storage
-    const jwt = window.localStorage.getItem('jwt')
-    // if we found a token, check the web service to see if it's still valid
-    if (jwt !== null && jwt.length > 40) {
-      console.log('found existing JWT in localStorage')
-      // check jwt is valid
-      const response = await dispatch('fetch', {
-        group: 'user',
-        type: 'valid',
-        message: 'check if user login is valid',
-        url: getters.endpoints.validLogin,
-        options: {
-          headers: {
-            Authorization: 'Bearer ' + jwt
-          }
-        }
-      })
-      if (response instanceof Error) {
-        // unexpected error, like network error or 500 error
-        Toast.open({
-          message: 'Failed to check get your CMS user information: ' + e.message,
-          duration: 8 * 1000,
-          type: 'is-danger'
-        })
-      } else {
-        dispatch('setJwt', jwt)
-      }
-    } else if (query.state === 'helper-bot-login' && query.code) {
+    if (query.state === 'webex-login' && query.code) {
       // no JWT in localstorage, but has SSO login auth code. complete SSO login.
       const response = await dispatch('fetch', {
-        url: getters.endpoints.sso,
-        group: 'user',
-        type: 'login',
+        url: getters.endpoints.oauth2,
+        group: 'webex',
+        type: 'oauth2',
+        message: 'complete Webex OAUTH2 login',
         options: {
           method: 'POST',
           // pass our current URL query params to REST API body
           body: query
-        },
-        onError (e) {
-          const regex = /^Authorization code is invalid or expired/i
-          if (e.status === 400 && e.text.match(regex)) {
-            // expired SSO auth code - send user back to SSO login
-            window.location = getters.ssoUrl
-          } else {
-            // unexpected SSO error - display to user
-            Toast.open({
-              message: e.message,
-              duration: 10 * 1000,
-              type: 'is-danger'
-            })
-          }
         }
       })
-      if (response.jwt) {
-        // save the new JWT. user is now logged in.
-        dispatch('setJwt', response.jwt)
+      if (response instanceof Error) {
+        const regex = /^Authorization code is invalid or expired/i
+        if (response.status === 400 && response.text.match(regex)) {
+          // expired SSO auth code - send user back to SSO login
+          window.location = getters.oauthUrl
+        } else {
+          // unexpected SSO error - display to user
+          Toast.open({
+            message: response.message,
+            duration: 10 * 1000,
+            type: 'is-danger'
+          })
+        }
+      } else {
+        // save the new webex token. user is now logged in.
+        dispatch('setToken', response.access_token)
         // remove SSO code from the current URL query parameters
         delete query.code
         delete query.state
-        router.push({query})
+        // and go to agent page
+        router.push({name: 'Agent', query})
       }
     } else {
       // no JWT and no SSO auth code - send user to SSO login
-      window.location = getters.ssoUrl
+      window.location = getters.oauthUrl
     }
   }
 }

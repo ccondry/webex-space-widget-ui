@@ -117,7 +117,7 @@ export default {
       // this current URL
       return `${window.location.protocol}//${window.location.host}/admin/`
     },
-    webexSsoUrl () {
+    webexoauthUrl () {
       const endpoint = 'https://webexapis.com/v1/authorize'
       // TODO get these from REST API? maybe?
       const scopes = [
@@ -180,7 +180,7 @@ export default {
         trapFocus: true,
         rounded: true,
         props: {
-          url: this.webexSsoUrl
+          url: this.webexoauthUrl
         },
         events: {
           // submit: (data) => {}

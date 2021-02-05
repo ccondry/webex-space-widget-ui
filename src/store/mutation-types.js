@@ -3,18 +3,15 @@ export const SET_WORKING = 'SET_WORKING'
 export const SET_LOADING = 'SET_LOADING'
 
 // auth
-export const SET_JWT = 'SET_JWT'
-
-// rooms
-export const SET_ROOMS = 'SET_ROOMS'
-export const SET_ROOM_DETAILS = 'SET_ROOM_DETAILS'
-
-// admin - bot users list
-export const SET_USERS = 'SET_USERS'
-// bot user webhooks
-export const SET_WEBHOOKS = 'SET_WEBHOOKS'
-// bot user room memberships
-export const SET_MEMBERSHIPS = 'SET_MEMBERSHIPS'
+export const SET_TOKEN = 'SET_TOKEN'
+export const SET_ME = 'SET_ME'
 
 // API version
 export const SET_VERSION = 'SET_VERSION'
+
+// web socket
+export const SET_WEB_SOCKET_OPEN = 'SET_WEB_SOCKET_OPEN'
+export const SET_WEB_SOCKET = 'SET_WEB_SOCKET'
+
+// webex
+export const SET_SPACE_ID = 'SET_SPACE_ID'

@@ -1,18 +1,18 @@
 <template>
-  <panel :title="`Welcome ${jwtUser.given_name}!`" aria-id="welcome">
+  <panel :title="`Welcome!`" aria-id="welcome">
     <p>
-      Welcome to the Cisco dCloud Helper Bot.
+      Welcome to the Cisco dCloud ISG Webex instant demo.
     </p>
   </panel>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   computed: {
     ...mapGetters([
-      'jwtUser'
+      'me'
     ])
   }
 }

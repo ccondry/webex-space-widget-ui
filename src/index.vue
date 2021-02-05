@@ -8,16 +8,6 @@
     class="buttons"
     style="float: right; position: absolute; right: 10px; top: 10px;"
     >
-      <!-- admin panel button -->
-      <b-button
-      v-if="isAdmin && atHome"
-      type="is-info"
-      rounded
-      @click="clickAdmin"
-      >
-        Admin
-      </b-button>
-
       <!-- home button -->
       <b-button
       v-if="atAdmin"
@@ -27,16 +17,6 @@
       >
         Home
       </b-button>
-
-      <!-- logout -->
-      <!-- <b-button
-      v-if="isLoggedIn"
-      type="is-primary"
-      rounded
-      @click="clickLogout"
-      >
-        Log Out
-      </b-button> -->
     </div>
     <section class="main">
       <!-- vue-router container -->
@@ -58,7 +38,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import AppFooter from './components/app-footer'
 
 export default {
@@ -69,8 +49,7 @@ export default {
   computed: {
     ...mapGetters([
       'isLoggedIn',
-      'isAdmin',
-      'jwtUser'
+      'me'
     ]),
     atHome () {
       try {
@@ -88,35 +67,16 @@ export default {
     }
   },
 
-  watch: {
-    isLoggedIn (val, oldVal) {
-      if (val && !oldVal) {
-        // user just logged in
-      } else if (!val && oldVal) {
-        // user just logged out
-        // redirect them to SSO
-        this.checkJwt()
-      }
-    }
-  },
-
   mounted () {
-    // try to find and validate user's JWT from localStorage,
-    // or start the SSO login process to get one
-    this.checkJwt()
     // get REST API version
     this.getApiVersion()
   },
 
   methods: {
     ...mapActions([
-      'checkJwt',
       'logout',
       'getApiVersion'
     ]),
-    clickAdmin () {
-      this.$router.push({name: 'Admin'}).catch(e => {})
-    },
     clickLogout () {
       this.logout()
     },
