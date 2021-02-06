@@ -1,6 +1,6 @@
 {
   "name": "webex-space-widget-ui",
-  "version": "2021.2.4",
+  "version": "2021.2.6",
   "description": "UI for the dCloud Webex space widget demo",
   "author": "Coty Condry <ccondry@cisco.com>",
   "main": "dist/js/index.common.js",
