@@ -78,7 +78,7 @@ export default {
     ]),
     qrUrl () {
       if (this.me && Array.isArray(this.me.emails)) {
-        return `${window.location.protocol}//${window.location.host}/customer?agent=${this.me.emails.shift()}`
+        return `${window.location.protocol}//${window.location.host}/customer?agent=${this.me.emails[0]}`
       } else {
         return null
       }
