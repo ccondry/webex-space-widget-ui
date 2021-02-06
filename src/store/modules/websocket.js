@@ -26,7 +26,8 @@ const state = {
 
 const getters = {
   wsAddress: state => state.wsAddress,
-  websocket: state => state.websocket
+  websocket: state => state.websocket,
+  websocketOpen: state => state.websocketOpen
 }
 
 const mutations = {
@@ -39,12 +40,12 @@ const mutations = {
 }
 
 const actions = {
-  closeWebsocket ({commit}) {
+  closeWebsocket ({getters}) {
     // close websocket
-    commit(types.SET_WEB_SOCKET_OPEN, false)
-    commit(types.SET_WEB_SOCKET, null)
+    getters.websocket.close()
   },
   sendWebsocket ({getters, dispatch}, body) {
+    console.log('sending websocket message:', body)
     const json = JSON.stringify(body)
     try {
       getters.websocket.send(json)
@@ -55,7 +56,7 @@ const actions = {
   },
   connectWebsocket ({ commit, dispatch, getters }) {
     // Create a socket instance
-    const socket = new window.WebSocket(getters.wsAddress)
+    const socket = new window.WebSocket(getters.wsAddress + '?test=12345')
   
     // Open the socket
     socket.onopen = function (event) {
@@ -71,6 +72,11 @@ const actions = {
       // dispatch message to store it in state
       // dispatch('addWsMessage', JSON.parse(event.data))
       if (json.spaceId) {
+        // was there a guest token?
+        if (json.jwt) {
+          // dispatch('setGuestToken', json.token)
+          dispatch('setGuestToken', json.jwt)
+        }
         // have user join space ID now
         dispatch('joinSpace', json.spaceId)
       }
@@ -81,6 +87,7 @@ const actions = {
       console.log('websocket closed:', event)
       // mark socket closed
       commit(types.SET_WEB_SOCKET_OPEN, false)
+      commit(types.SET_WEB_SOCKET, null)
       if (event.code === 1005) {
         // server closed connection due to expired session - don't reconnect
         // dispatch('addWsMessage', {

@@ -8,11 +8,6 @@ const routes = [{
   path: '/',
   component: () => import(`../views/home.vue`)
 }, {
-  // the admin panel
-  name: 'Admin',
-  path: '/admin',
-  component: () => import(`../views/admin.vue`)
-}, {
   // complete oauth login
   name: 'Login',
   path: '/oauth',

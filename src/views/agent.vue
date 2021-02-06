@@ -1,82 +1,111 @@
 <template>
   <div>
-    <panel v-if="me" v-show="!spaceId" title="Welcome">
-      <p>Hello {{ me.firstName }}!</p>
-      <b-field>
-        <b-button
-        v-show="!websocket"
-        rounded
-        type="is-success"
-        @click="clickConnect"
+    <!-- <pre>{{ qrUrl }}</pre> -->
+    <!-- <pre>{{ websocket ? 'yes' : 'no'}}</pre> -->
+    <!-- <pre>{{ websocket ? 'yes' : 'no'}}</pre> -->
+    <panel v-if="me" v-show="!spaceId" :title="`Welcome ${me.firstName}`">
+      <b-loading :active="isLoading" :is-full-page="false" />
+      <!-- agent is not ready -->
+      <div v-show="!websocketOpen">
+        <p>Go ready to become available for chat.</p>
+        <b-field>
+          <b-button
+          rounded
+          expanded
+          type="is-success"
+          @click="clickGoReady"
+          >
+            Go Ready
+          </b-button>
+        </b-field>
+      </div>
+
+      <div v-show="websocketOpen">
+        <p v-if="qrUrl">
+          Have your customer scan this QR code to chat with you!
+        </p>
+        <span
+        v-if="qrUrl"
+        style="display: flex; justify-content: space-around;"
         >
-          Connect WebSocket
-        </b-button>
-        <b-button
-        v-show="websocket"
-        rounded
-        type="is-success"
-        @click="clickSendWebSocket"
-        >
-          Send WebSocket Message
-        </b-button>
-      </b-field>
-      <b-field>
-        <b-button
-        rounded
-        type="is-success"
-        @click="clickStart"
-        >
-          Start Webex Widget
-        </b-button>
-      </b-field>
+          <vue-qr :text="qrUrl" />
+        </span>
+        <!-- agent is ready -->
+        <b-field>
+          <b-button
+          rounded
+          expanded
+          type="is-danger"
+          @click="clickGoNotReady"
+          >
+            Go Not Ready
+          </b-button>
+        </b-field>
+      </div>
     </panel>
 
     <panel v-show="spaceId">
       <div
-      id="my-webexteams-widget"
-      style="width: 800px; height: 600px;"
+      id="agent-widget"
+      style="width: 500px; height: 400px;"
       />
     </panel>
-    <b-loading :active="isLoading" />
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-// import webex from 'webex'
-
+import VueQr from 'vue-qr'
+ 
 export default {
+  components: {
+    VueQr
+  },
+
+  data () {
+    return {
+      isLoading: false
+    }
+  },
+
   computed: {
     ...mapGetters([
       'me',
       'token',
       'websocket',
-      'spaceId'
+      'spaceId',
+      'websocketOpen'
     ]),
-    isLoading () {
-      return !this.me
+    qrUrl () {
+      if (this.me && Array.isArray(this.me.emails)) {
+        return `${window.location.protocol}//${window.location.host}/customer?agent=${this.me.emails.shift()}`
+      } else {
+        return null
+      }
     }
   },
 
   watch: {
-    me () {
-      this.checkInit()
-    },
     spaceId () {
       // const widgetEl = this.$refs['webex-widget']
-      const widgetEl = document.getElementById('my-webexteams-widget')
+      const widgetEl = document.getElementById('agent-widget')
       // Init a new widget
       window.webex.widget(widgetEl).spaceWidget({
         accessToken: this.token,
         destinationId: this.spaceId,
         destinationType: 'spaceId'
       })
+    },
+    websocketOpen (val) {
+      if (val === true) {
+        console.log('websocket open. sending message...')
+        // send token to websocket server to register as ready
+        this.sendWebsocket({token: this.token})
+      }
     }
   },
 
   mounted () {
-    // logged in but not started webex widget yet
-    this.checkInit()
     // check if no token in state yet - check localstorage for it, or forward home if not
     if (!this.token) {
       this.checkToken()
@@ -86,24 +115,16 @@ export default {
   methods: {
     ...mapActions([
       'checkToken',
+      'sendWebsocket',
       'connectWebsocket',
-      'sendWebsocket'
+      'closeWebsocket'
     ]),
-    clickStart () {
-      this.initWebex()
-    },
-    clickConnect () {
+    clickGoReady () {
+      // connect to websocket server
       this.connectWebsocket()
     },
-    clickSendWebSocket () {
-      this.sendWebsocket({token: this.token})
-    },
-    checkInit () {
-      // is user logged in?
-      if (this.me) {
-        // connect the web socket now
-        // this.connectWebsocket()
-      }
+    clickGoNotReady () {
+      this.closeWebsocket()
     }
   }
 }

@@ -65,11 +65,11 @@ const getters = {
 
 const actions = {
   async joinSpace ({commit}, data) {
-    Toast.open({
-      message: 'join space ' + data,
-      type: 'is-info',
-      duration: 16 * 1000
-    })
+    // Toast.open({
+    //   message: 'join space ' + data,
+    //   type: 'is-info',
+    //   duration: 16 * 1000
+    // })
     commit(types.SET_SPACE_ID, data)
   },
   async getMe ({dispatch, getters}) {
@@ -135,18 +135,8 @@ const actions = {
         }
       })
       if (response instanceof Error) {
-        const regex = /^Authorization code is invalid or expired/i
-        if (response.status === 400 && response.text.match(regex)) {
-          // expired SSO auth code - send user back to SSO login
-          window.location = getters.oauthUrl
-        } else {
-          // unexpected SSO error - display to user
-          Toast.open({
-            message: response.message,
-            duration: 10 * 1000,
-            type: 'is-danger'
-          })
-        }
+        // timeout, old code, reused code, etc. Go Home.
+        router.push({name: 'Home'})
       } else {
         // save the new webex token. user is now logged in.
         dispatch('setToken', response.access_token)

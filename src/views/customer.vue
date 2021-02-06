@@ -1,7 +1,12 @@
 <template>
   <div>
-    <panel title="Welcome">
-      <p>Welcome Customer!</p>
+    <!-- <pre>{{ options }}</pre> -->
+    <panel v-show="!spaceId" title="Welcome">
+      <b-loading :active="isLoading" :is-full-page="false" />
+      <p>Welcome!</p>
+      <b-field label="Your Agent">
+        <div>{{ $route.query.agent }}</div>
+      </b-field>
       <b-field label="Your Name">
         <b-input v-model="form.name" />
       </b-field>
@@ -11,22 +16,22 @@
 
       <b-field>
         <b-button
-        v-show="!websocket"
         rounded
+        expanded
         type="is-success"
-        @click="clickConnect"
+        @click="clickStartChat"
         >
-          Connect WebSocket
-        </b-button>
-        <b-button
-        v-show="websocket"
-        rounded
-        type="is-success"
-        @click="clickSendWebSocket"
-        >
-          Send WebSocket Message
+          Start Chat
         </b-button>
       </b-field>
+    </panel>
+
+    <!-- webex space widget -->
+    <panel v-show="guestToken && spaceId">
+      <div
+      id="customer-widget"
+      style="width: 500px; height: 400px;"
+      />
     </panel>
   </div>
 </template>
@@ -38,16 +43,48 @@ export default {
   data () {
     return {
       form: {
-        name: '',
-        request: ''
-      }
+        name: 'Coty Condry',
+        request: 'Help'
+      },
+      isLoading: false
     }
   },
 
   computed: {
     ...mapGetters([
-      'websocket'
-    ])
+      'websocket',
+      'guestToken',
+      'spaceId',
+      'websocketOpen'
+    ]),
+    options () {
+      return {
+        guestToken: this.guestToken,
+        // accessToken: this.guestToken,
+        destinationId: this.spaceId,
+        destinationType: 'spaceId'
+      }
+    }
+  },
+
+  watch: {
+    spaceId () {
+      const widgetEl = document.getElementById('customer-widget')
+      // Init a new widget
+      window.webex.widget(widgetEl).spaceWidget(this.options)
+    },
+    websocketOpen (val) {
+      if (val === true) {
+        console.log('websocket open. sending message...')
+        // send token to websocket server to register as ready
+        this.sendWebsocket({
+          agent: this.$route.query.agent,
+          name: this.form.name,
+          request: this.form.request
+        })
+        this.isLoading = true
+      }
+    }
   },
 
   methods: {
@@ -55,16 +92,8 @@ export default {
       'connectWebsocket',
       'sendWebsocket'
     ]),
-    clickConnect () {
+    clickStartChat () {
       this.connectWebsocket()
-    },
-    clickSendWebSocket () {
-      this.sendWebsocket({
-        agent: 'ccondry@cisco.com',
-        issuerId: 'test',
-        name: this.form.name,
-        request: this.form.request
-      })
     }
   }
 }
