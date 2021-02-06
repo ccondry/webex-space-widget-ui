@@ -27,12 +27,11 @@
     </panel>
 
     <!-- webex space widget -->
-    <panel v-show="guestToken && spaceId">
-      <div
-      id="customer-widget"
-      style="width: 500px; height: 400px;"
-      />
-    </panel>
+    <div
+    v-show="guestToken && spaceId"
+    id="customer-widget"
+    style="width: 80vw; height: 80vh;"
+    />
   </div>
 </template>
 

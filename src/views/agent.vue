@@ -44,12 +44,12 @@
       </div>
     </panel>
 
-    <panel v-show="spaceId">
-      <div
-      id="agent-widget"
-      style="width: 500px; height: 400px;"
-      />
-    </panel>
+    <!-- webex space widget -->
+    <div
+    v-show="spaceId"
+    id="agent-widget"
+    style="width: 80vw; height: 80vh;"
+    />
   </div>
 </template>
 
