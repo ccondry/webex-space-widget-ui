@@ -42,8 +42,8 @@ export default {
   data () {
     return {
       form: {
-        name: 'Coty Condry',
-        request: 'Help'
+        name: '',
+        request: ''
       },
       isLoading: false
     }
