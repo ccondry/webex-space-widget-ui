@@ -6,16 +6,16 @@ if [ $? -eq 0 ]; then
   yarn build
   while [ $? != 0 ]
   do
-    echo "failed to build helper-bot-ui website files. trying again..."
+    echo "failed to build webex-space-widget-ui website files. trying again..."
     yarn build
   done
   echo "yarn build successful. copying dist files to www folder..."
-  mkdir -p /var/www/html/helper
-  cp -rf dist/* /var/www/html/helper/
+  mkdir -p /var/www/html/webex-space-widget
+  cp -rf dist/* /var/www/html/webex-space-widget/
   if [ $? -eq 0 ]; then
-    echo "successfully installed helper-bot-ui website files"
+    echo "successfully installed webex-space-widget-ui website files"
   else
-    echo "failed to install helper-bot-ui website files"
+    echo "failed to install webex-space-widget-ui website files"
   fi
 else
   echo "yarn failed"

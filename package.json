@@ -1,7 +1,7 @@
 {
-  "name": "isg-ui",
+  "name": "webex-space-widget-ui",
   "version": "2021.2.4",
-  "description": "UI for the dCloud ISG Webex demo",
+  "description": "UI for the dCloud Webex space widget demo",
   "author": "Coty Condry <ccondry@cisco.com>",
   "main": "dist/js/index.common.js",
   "unpkg": "dist/js/index.js",
